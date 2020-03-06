@@ -4,7 +4,7 @@ exports.config = {
   framework: 'jasmine',
   allScriptsTimeout: 50000000,
   seleniumAddress: 'http://localhost:4444/wd/hub',
-  specs: ['scraper.js'],
+  specs: ['cheerioScraper.js'],
   capabilites : {
     browser: 'chrome'
   },

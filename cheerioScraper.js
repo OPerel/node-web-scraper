@@ -1,35 +1,74 @@
-var express = require('express');
-var fs = require('fs');
-var request = require('request');
-var cheerio = require('cheerio');
-var app     = express();
+const fs = require('fs');
+const cheerio = require('cheerio');
 
-app.get('/scrape', function(req, res){
-  // The URL we will scrape from - in our example Anchorman 2.
+const classInfoObject = require('./classInfo').classInfoObject;
 
-  url = 'http://www.imdb.com/title/tt1229340/';
+describe('get class info', () => {
 
-  // The structure of our request call
-  // The first parameter is our URL
-  // The callback function takes 3 parameters, an error, response status code and the html
+  beforeEach(() => {
+    browser.waitForAngularEnabled(false);
+  });
 
-  request(url, function(error, response, html){
+  it('should go to the site and click the date search button', () => {
+    const url = 'https://mtamn.mta.ac.il/yedion/fireflyweb.aspx?prgname=Enter_Search&_ga=2.124056077.64792284.1583424913-1750835995.1583424913';
+    browser.get(url);
+    element(by.css('input[value="בצע חיפוש במערכת התאריכית"]')).click();
+    browser.sleep(4000);
+  });
 
-    // First we'll check to make sure no errors occurred when making the request
+  it('should click the num of rows scrolldown and choose all', () => {
+    const scrollDown = element(by.css('.select2-selection__rendered'));
+    
+    scrollDown.click();
+    browser.sleep(1000);
+    element(by.xpath('/html/body/span[2]/span/span[2]/ul/li[4]')).click();
+    browser.sleep(1000);
+    expect(scrollDown.getText()).toEqual('הכל');
+  });
 
-    if(!error){
-      // Next, we'll utilize the cheerio library on the returned html which will essentially give us jQuery functionality
+  it('should get data from table', async () => {
 
-      var $ = cheerio.load(html);
+    const html = await browser.getPageSource();
 
-      // Finally, we'll define the variables we're going to capture
+    const $ = cheerio.load(html);
+    $.prototype.getTableData = () => {
+      const rowsObjects = [];
 
-      var title, release, rating;
-      var json = { title : "", release : "", rating : ""};
-    }
-  })
-})
+      // Iterate over all rows in the table
+      $('tbody > tr').each((idx, row) => {
+        const rowType = $(row).children('td').last().text();
 
-app.listen('8081')
-console.log('Magic happens on port 8081');
-exports = module.exports = app;
+        // Skip non class events
+        if (rowType.trim() === 'קורס') {
+
+          // Iterate over columns in row
+          const rowVals = $(row).children('td').map((_, cell) => {
+
+            // Get each column's value and return to row's values array
+            return $(cell).text(); 
+          });
+
+          // Build class object and push to rows objects array 
+          console.log(`row #${idx} created for class: ${rowVals[6]} type: ${rowVals[10]}`)
+          rowsObjects.push(classInfoObject(idx, rowVals));
+        }
+      });
+      
+      // Write to Json file
+      const objArrString = JSON.stringify(rowsObjects);
+      fs.writeFile('./dist/jsonData.json', objArrString, err => {
+        if (err) {
+          console.log('Error writing file', err)
+        } else {
+          console.log('Successfully wrote file')
+        }
+      });
+    };
+
+    $('body').getTableData();
+
+    // Write to file
+    // const csv = new ObjectsToCsv(allRowsVals);
+    // csv.toDisk('../dist/test.csv').then(() => console.log('file created'));
+  });
+});
