@@ -1,6 +1,8 @@
 const fs = require('fs');
 const cheerio = require('cheerio');
 
+const ObjectsToCsv = require('objects-to-csv'); 
+
 const classInfoObject = require('./classInfo').classInfoObject;
 
 describe('get class info', () => {
@@ -41,34 +43,30 @@ describe('get class info', () => {
         // Skip non class events
         if (rowType.trim() === 'קורס') {
 
-          // Iterate over columns in row
-          const rowVals = $(row).children('td').map((_, cell) => {
-
-            // Get each column's value and return to row's values array
-            return $(cell).text(); 
-          });
+          // Iterate over columns in row and get each column's text
+          const rowVals = $(row).children('td').map((_, cell) => $(cell).text());
 
           // Build class object and push to rows objects array 
-          console.log(`row #${idx} created for class: ${rowVals[6]} type: ${rowVals[10]}`)
+          console.log(`row #${idx} created for class: ${rowVals[6]}`);
           rowsObjects.push(classInfoObject(idx, rowVals));
         }
       });
       
       // Write to Json file
-      const objArrString = JSON.stringify(rowsObjects);
-      fs.writeFile('./dist/jsonData.json', objArrString, err => {
-        if (err) {
-          console.log('Error writing file', err)
-        } else {
-          console.log('Successfully wrote file')
-        }
-      });
-    };
+      // const objArrString = JSON.stringify(rowsObjects);
+      // fs.writeFile('./dist/jsonData.json', objArrString, err => {
+      //   if (err) {
+      //     console.log('Error writing file', err)
+      //   } else {
+      //     console.log('Successfully wrote file')
+      //   }
+      // });
+
+      // Write to CSV file
+      // const csv = new ObjectsToCsv(rowsObjects);
+      // csv.toDisk('./dist/test.csv').then(() => console.log('file created'));
+    }
 
     $('body').getTableData();
-
-    // Write to file
-    // const csv = new ObjectsToCsv(allRowsVals);
-    // csv.toDisk('../dist/test.csv').then(() => console.log('file created'));
   });
 });
