@@ -1,8 +1,9 @@
 const fs = require('fs');
-const ObjectsToCsv = require('objects-to-csv');
 
 const rawData = fs.readFileSync('../dist/jsonData.json');
 const data = JSON.parse(rawData);
+
+import * as CSV from 'csv-string';
 
 function getDays(): string[] {
   return data.map(c => c.date.trim())
@@ -39,9 +40,44 @@ function buildDayObj(): Day[] {
   }));
 }
 
-// Write to CSV file
-const csv = new ObjectsToCsv(buildDayObj());
-csv.toDisk('../dist/test.csv').then(() => console.log('file created'));
+const toCsv = (data: Day[]): string => {
+  let csvString: string = '';
+  data.forEach((day: Day) => {
+    csvString += `*********** תאריך ${day.day} ***********\n`;
+    day.buildings.forEach((building: Building) => {
+      csvString += `********** בנין ${building.name} **********\n`;
+      if (building.courses[0]) csvString += Object.keys(building.courses[0]).join(', ') + '\n';
+      building.courses.forEach((course: Course) => {
+        csvString += CSV.stringify(course);
+      });
+    });
+  });
+  return csvString;
+}
+
+const daysObjects = buildDayObj();
+
+// Write to csv string to file
+const objArrString = toCsv(daysObjects);
+fs.writeFile('../dist/csvTest.csv', objArrString, err => {
+  if (err) {
+    console.log('Error writing file', err)
+  } else {
+    console.log('Successfully wrote file')
+  }
+});
+
+
+
+// Write to Json file
+// const objArrString = JSON.stringify(buildDayObj());
+// fs.writeFile('../dist/formatJsonData.json', objArrString, err => {
+//   if (err) {
+//     console.log('Error writing file', err)
+//   } else {
+//     console.log('Successfully wrote file')
+//   }
+// });
 
 interface Day {
   day: string,

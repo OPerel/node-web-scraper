@@ -1,5 +1,7 @@
 const fs = require('fs');
 const cheerio = require('cheerio');
+const ObjectsToCsv = require('objects-to-csv');
+
 
 const classInfoObject = require('./classInfo').classInfoObject;
 
@@ -49,6 +51,10 @@ describe('get class info', () => {
           rowsObjects.push(classInfoObject(idx, rowVals));
         }
       });
+
+      // Write to CSV file
+      const csv = new ObjectsToCsv(rowsObjects);
+      csv.toDisk('./dist/test.csv').then(() => console.log('file created'));
       
       // Write to Json file
       // const objArrString = JSON.stringify(rowsObjects);
