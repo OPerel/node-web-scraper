@@ -1,124 +1,63 @@
 const fs = require('fs');
+const ObjectsToCsv = require('objects-to-csv');
 
-class FormatData {
-  data: any;
-  days: string[];
-  fData: Day[];
+const rawData = fs.readFileSync('../dist/jsonData.json');
+const data = JSON.parse(rawData);
 
-  constructor() {
-    fs.readFile('../dist/jsonData.json', (err: Error ,data) => {
-      if (err) {
-        console.log('Error: ', err);
-      } else {
-        const parsedData = JSON.parse(data);
-        this.data = parsedData;
-        this.getDays(parsedData);
-      }
+function getDays(): string[] {
+  return data.map(c => c.date.trim())
+    .filter((value: never, index: number, self: []) => { 
+      return self.indexOf(value) === index;
     });
-  }
-
-  getDays(dates: string[]): void {
-    // console.log('this.data[0]: ', this.data[0]);
-    const filteredDates = this.data.map((c => c.date.trim()))
-      .filter((value: never, index: number, self: []) => { 
-        return self.indexOf(value) === index;
-      });
-    this.days = filteredDates
-    this.makeBuildingObj();
-  }
-
-  makeBuildingObj() {
-    const filteredBuildings = this.data.map((c => c.room.trim().split(' ')[0]))
-      .filter((value: never, index: number, self: []) => { 
-        return self.indexOf(value) === index;
-      });
-
-    const buildings = [];
-    filteredBuildings.forEach((building: string) => {
-
-      const courses = [];
-      // let date = '';
-      this.data.forEach((c: any) => {
-        if (building === c.room.trim().split(' ')[0]) {
-          // date = c.date.trim();
-          courses.push({
-            name: c.subject.trim(),
-            teacherName: c.proffesor.trim(),
-            room: c.room.trim(),
-            faculty: c.faculty.trim(),
-            startTime: c.startTime.trim(),
-            endTime: c.endTime.trim(),
-          })
-        }
-      });
-      buildings.push({
-        name: building,
-        // date,
-        courses
-      });
-    });
-    // this.buildDayObj(buildings);
-    console.log('buildings[0]: ', buildings[0]);
-  }
-
-  buildDayObj(buildings: any) {
-
-    const days = [];
-    this.days.forEach((date: string) => {
-
-      const builds = [];
-      buildings.forEach((build: any) => {
-        if (date === build.date) {
-          builds.push(build)
-        }
-      })
-      days.push({
-        day: date,
-        buildings: builds
-      })
-    });
-    console.log('days[1]: ', days[1]);
-  } 
-
 }
 
-const test = new FormatData();
+function getBuildings(): string[] {
+  return data.map(c => {
+    const building = c.room.trim().split(' ')[0];
+    return building;
+  })
+    .filter((value: never, index: number, self: []) => { 
+      return self.indexOf(value) === index;
+    });
+}
+
+function buildDayObj(): Day[] {
+  return getDays().map((date: string): Day => ({
+    day: date,
+    buildings: getBuildings().map((b: string): Building => ({
+      name: b,
+      courses: data.filter((c: any) => c.date.trim() === date && c.room.trim().split(' ')[0] === b)
+        .map((fc: any): Course => ({
+          name: fc.subject,
+          teacherName: fc.proffesor,
+          room: fc.room,
+          faculty: fc.faculty,
+          startTime: fc.startTime,
+          endTime: fc.endTime,
+        }))
+    }))
+  }));
+}
+
+// Write to CSV file
+const csv = new ObjectsToCsv(buildDayObj());
+csv.toDisk('../dist/test.csv').then(() => console.log('file created'));
 
 interface Day {
-  day: string | Date,
-  buildings: [
-    {
-      name: string,
-      date: string;
-      courses: [
-        {
-          name: string,
-          teacherName: string,
-          room: string,
-          faculty: string,
-          startTime: string | Date,
-          endTime: string | Date,
-        }
-      ]
-    }
-  ]
+  day: string,
+  buildings: Building[]
 }
 
-/**const obj: any = {
-            day: date,
-            buildings: [
-              {
-                name: '',
-                courses: [
-                  {
-                    name: '',
-                    teacherName: '',
-                    room: '',
-                    faculty: '',
-                    startTime: '',
-                    endTime: '',
-                  }
-                ]
-              }
-            ]
-          } */
+interface Building {
+  name: string,
+  courses: Course[]
+}
+
+interface Course {
+  name: string,
+  teacherName: string,
+  room: string,
+  faculty: string,
+  startTime: string | Date,
+  endTime: string | Date,
+}

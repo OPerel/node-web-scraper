@@ -1,8 +1,6 @@
 const fs = require('fs');
 const cheerio = require('cheerio');
 
-const ObjectsToCsv = require('objects-to-csv'); 
-
 const classInfoObject = require('./classInfo').classInfoObject;
 
 describe('get class info', () => {
@@ -61,10 +59,6 @@ describe('get class info', () => {
       //     console.log('Successfully wrote file')
       //   }
       // });
-
-      // Write to CSV file
-      // const csv = new ObjectsToCsv(rowsObjects);
-      // csv.toDisk('./dist/test.csv').then(() => console.log('file created'));
     }
 
     $('body').getTableData();
