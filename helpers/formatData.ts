@@ -3,14 +3,14 @@ import * as CSV from 'csv-string';
 import { RawClass, Day, Building, Course } from '../types';
 
 
-function getDays(filteredData: RawClass[]): string[] {
+const getDays = (filteredData: RawClass[]): string[] => {
   return filteredData.map((c: RawClass) => c.date.trim())
     .filter((value: never, index: number, self: []) => { 
       return self.indexOf(value) === index;
     });
 }
 
-function getBuildings(filteredData: RawClass[]): string[] {
+const getBuildings = (filteredData: RawClass[]): string[] => {
   return filteredData.map((c: RawClass) => {
     const building = c.room.trim().split(' ')[0];
     return building;
@@ -20,7 +20,7 @@ function getBuildings(filteredData: RawClass[]): string[] {
     });
 }
 
-export function buildDayObjAndReturnCsvString(filteredData: RawClass[]): string {
+export const buildDayObjAndReturnCsvString = (filteredData: RawClass[]): string => { 
   const dayObjects = getDays(filteredData).map((date: string): Day => ({
     day: date,
     buildings: getBuildings(filteredData).map((b: string): Building => ({

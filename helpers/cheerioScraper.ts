@@ -1,7 +1,7 @@
 import * as fs from 'fs';
+import { browser, element, by } from 'protractor';
 const cheerio = require('cheerio');
 
-import { browser, element, by } from 'protractor';
 import { classInfoObject } from './classInfo';
 import { filterClassData } from './filterTeachers';
 import { buildDayObjAndReturnCsvString } from './formatData';
@@ -39,14 +39,14 @@ describe('get class info', () => {
       const rowsObjects: RawClass[] = [];
 
       // Iterate over all rows in the table
-      $('tbody > tr').each((idx: number, row) => {
-        const rowType = $(row).children('td').last().text();
-
+      $('tbody > tr').each((idx: number, row: any) => {
+        
         // Skip non class events
+        const rowType: string = $(row).children('td').last().text();
         if (rowType.trim() === 'קורס') {
 
           // Iterate over columns in row and get each column's text
-          const rowVals: string[] = $(row).children('td').map((_: number, cell) => $(cell).text());
+          const rowVals: string[] = $(row).children('td').map((_: number, cell: any) => $(cell).text());
 
           // Build class object and push to rows objects array 
           console.log(`row #${idx} created for class: ${rowVals[6]}`);

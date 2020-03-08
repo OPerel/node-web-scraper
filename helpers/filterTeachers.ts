@@ -14,11 +14,10 @@ const createTeachersList = async (): Promise<string[]> => {
   });
 }
 
-export const filterClassData = (classData: RawClass[]): Promise<RawClass[]> => {
-  return createTeachersList().then((ls: string[]) => {
-    return classData.filter((c: RawClass) => {
-      return ls.includes(c.proffesor.split(' ').slice(1).join(' ').trim());
-    })
-  })
+export const filterClassData = async (classData: RawClass[]): Promise<RawClass[]> => {
+  const ls: string[] = await createTeachersList();
+  return classData.filter((c: RawClass) => {
+    return ls.includes(c.proffesor.split(' ').slice(1).join(' ').trim());
+  });
 }
 
