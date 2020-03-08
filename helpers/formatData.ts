@@ -1,19 +1,18 @@
 const fs = require('fs');
+import * as CSV from 'csv-string';
 
 const rawData = fs.readFileSync('../dist/jsonData.json');
 const data = JSON.parse(rawData);
 
-import * as CSV from 'csv-string';
-
 function getDays(): string[] {
-  return data.map(c => c.date.trim())
+  return data.map((c: any) => c.date.trim())
     .filter((value: never, index: number, self: []) => { 
       return self.indexOf(value) === index;
     });
 }
 
 function getBuildings(): string[] {
-  return data.map(c => {
+  return data.map((c: any) => {
     const building = c.room.trim().split(' ')[0];
     return building;
   })
@@ -40,7 +39,7 @@ function buildDayObj(): Day[] {
   }));
 }
 
-const toCsv = (data: Day[]): string => {
+const toCsvString = (data: Day[]): string => {
   let csvString: string = '';
   data.forEach((day: Day) => {
     csvString += `*********** תאריך ${day.day} ***********\n`;
@@ -58,8 +57,8 @@ const toCsv = (data: Day[]): string => {
 const daysObjects = buildDayObj();
 
 // Write to csv string to file
-const objArrString = toCsv(daysObjects);
-fs.writeFile('../dist/csvTest.csv', objArrString, err => {
+const objArrString = toCsvString(daysObjects);
+fs.writeFile('../dist/csvTest.csv', objArrString, (err: Error) => {
   if (err) {
     console.log('Error writing file', err)
   } else {

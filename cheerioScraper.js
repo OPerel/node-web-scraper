@@ -51,20 +51,16 @@ describe('get class info', () => {
           rowsObjects.push(classInfoObject(idx, rowVals));
         }
       });
-
-      // Write to CSV file
-      const csv = new ObjectsToCsv(rowsObjects);
-      csv.toDisk('./dist/test.csv').then(() => console.log('file created'));
       
       // Write to Json file
-      // const objArrString = JSON.stringify(rowsObjects);
-      // fs.writeFile('./dist/jsonData.json', objArrString, err => {
-      //   if (err) {
-      //     console.log('Error writing file', err)
-      //   } else {
-      //     console.log('Successfully wrote file')
-      //   }
-      // });
+      const objArrString = JSON.stringify(rowsObjects);
+      fs.writeFile('./dist/jsonRawData.json', objArrString, err => {
+        if (err) {
+          console.log('Error writing file', err)
+        } else {
+          console.log('Successfully wrote file')
+        }
+      });
     }
 
     $('body').getTableData();
