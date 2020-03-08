@@ -1,6 +1,7 @@
-const classInfoObject = (index, vals) => {
+import { RawClass } from '../types';
+
+export const classInfoObject = (vals: string[]): RawClass => {
   return {
-    index,
     date: vals[0],
     faculty: vals[1],
     startTime: vals[2],
@@ -13,8 +14,4 @@ const classInfoObject = (index, vals) => {
     status: vals[9],
     type: vals[10]
   };
-}
-
-module.exports = {
-  classInfoObject
 }

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "outDir": "../out-tsc/app",
+    "target": "es2015",
+    "lib": [
+      "es2018",
+      "dom"
+    ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "types": [
+      "jasmine",
+      "jasminewd2",
+      "node"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ]
+  }
+}

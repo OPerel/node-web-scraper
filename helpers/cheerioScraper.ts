@@ -1,9 +1,11 @@
-const fs = require('fs');
+import * as fs from 'fs';
 const cheerio = require('cheerio');
-const ObjectsToCsv = require('objects-to-csv');
 
-
-const classInfoObject = require('./classInfo').classInfoObject;
+import { browser, element, by } from 'protractor';
+import { classInfoObject } from './classInfo';
+import { filterClassData } from './filterTeachers';
+import { buildDayObjAndReturnCsvString } from './formatData';
+import { RawClass } from '../types';
 
 describe('get class info', () => {
 
@@ -34,35 +36,45 @@ describe('get class info', () => {
 
     const $ = cheerio.load(html);
     $.prototype.getTableData = () => {
-      const rowsObjects = [];
+      const rowsObjects: RawClass[] = [];
 
       // Iterate over all rows in the table
-      $('tbody > tr').each((idx, row) => {
+      $('tbody > tr').each((idx: number, row) => {
         const rowType = $(row).children('td').last().text();
 
         // Skip non class events
         if (rowType.trim() === 'קורס') {
 
           // Iterate over columns in row and get each column's text
-          const rowVals = $(row).children('td').map((_, cell) => $(cell).text());
+          const rowVals: string[] = $(row).children('td').map((_: number, cell) => $(cell).text());
 
           // Build class object and push to rows objects array 
           console.log(`row #${idx} created for class: ${rowVals[6]}`);
-          rowsObjects.push(classInfoObject(idx, rowVals));
+          rowsObjects.push(classInfoObject(rowVals));
         }
       });
-      
-      // Write to Json file
-      const objArrString = JSON.stringify(rowsObjects);
-      fs.writeFile('./dist/jsonRawData.json', objArrString, err => {
-        if (err) {
-          console.log('Error writing file', err)
-        } else {
-          console.log('Successfully wrote file')
-        }
-      });
+
+      return rowsObjects;
     }
 
-    $('body').getTableData();
+    const d: RawClass[] = $('body').getTableData();
+
+    // Call filterTeachers.ts with rowsObjects
+    const filteredData: RawClass[] = await filterClassData(d);
+    console.log(filteredData.length, filteredData[0]);
+
+
+    // Call formatData.ts with answer from filterTeachers.ts
+    const csvString: string = buildDayObjAndReturnCsvString(filteredData);
+      
+
+    // Write to CSV file with answer from formatData.ts
+    fs.writeFile('./dist/csvTest2.csv', csvString, (err: Error) => {
+      if (err) {
+        console.log('Error writing file', err)
+      } else {
+        console.log('Successfully wrote file')
+      }
+    });
   });
 });

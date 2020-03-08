@@ -1,18 +1,17 @@
-const fs = require('fs');
 import * as CSV from 'csv-string';
 
-const rawData = fs.readFileSync('../dist/jsonData.json');
-const data = JSON.parse(rawData);
+import { RawClass, Day, Building, Course } from '../types';
 
-function getDays(): string[] {
-  return data.map((c: any) => c.date.trim())
+
+function getDays(filteredData: RawClass[]): string[] {
+  return filteredData.map((c: RawClass) => c.date.trim())
     .filter((value: never, index: number, self: []) => { 
       return self.indexOf(value) === index;
     });
 }
 
-function getBuildings(): string[] {
-  return data.map((c: any) => {
+function getBuildings(filteredData: RawClass[]): string[] {
+  return filteredData.map((c: RawClass) => {
     const building = c.room.trim().split(' ')[0];
     return building;
   })
@@ -21,31 +20,32 @@ function getBuildings(): string[] {
     });
 }
 
-function buildDayObj(): Day[] {
-  return getDays().map((date: string): Day => ({
+export function buildDayObjAndReturnCsvString(filteredData: RawClass[]): string {
+  const dayObjects = getDays(filteredData).map((date: string): Day => ({
     day: date,
-    buildings: getBuildings().map((b: string): Building => ({
+    buildings: getBuildings(filteredData).map((b: string): Building => ({
       name: b,
-      courses: data.filter((c: any) => c.date.trim() === date && c.room.trim().split(' ')[0] === b)
-        .map((fc: any): Course => ({
+      courses: filteredData.filter((c: RawClass) => c.date.trim() === date && c.room.trim().split(' ')[0] === b)
+        .map((fc: RawClass): Course => ({
           name: fc.subject,
           teacherName: fc.proffesor,
           room: fc.room,
           faculty: fc.faculty,
-          startTime: fc.startTime,
           endTime: fc.endTime,
+          startTime: fc.startTime
         }))
     }))
   }));
+  return toCsvString(dayObjects);
 }
 
 const toCsvString = (data: Day[]): string => {
   let csvString: string = '';
   data.forEach((day: Day) => {
-    csvString += `*********** תאריך ${day.day} ***********\n`;
+    csvString += `\n*********** תאריך ${day.day} ***********\n`;
     day.buildings.forEach((building: Building) => {
-      csvString += `********** בנין ${building.name} **********\n`;
-      if (building.courses[0]) csvString += Object.keys(building.courses[0]).join(', ') + '\n';
+      csvString += `\n********** בנין ${building.name} **********\n`;
+      if (building.courses[0]) csvString += 'שיעור, מרצה, כיתה, פקולטה, שעת סיום, שעת התחלה\n';
       building.courses.forEach((course: Course) => {
         csvString += CSV.stringify(course);
       });
@@ -54,45 +54,4 @@ const toCsvString = (data: Day[]): string => {
   return csvString;
 }
 
-const daysObjects = buildDayObj();
 
-// Write to csv string to file
-const objArrString = toCsvString(daysObjects);
-fs.writeFile('../dist/csvTest.csv', objArrString, (err: Error) => {
-  if (err) {
-    console.log('Error writing file', err)
-  } else {
-    console.log('Successfully wrote file')
-  }
-});
-
-
-
-// Write to Json file
-// const objArrString = JSON.stringify(buildDayObj());
-// fs.writeFile('../dist/formatJsonData.json', objArrString, err => {
-//   if (err) {
-//     console.log('Error writing file', err)
-//   } else {
-//     console.log('Successfully wrote file')
-//   }
-// });
-
-interface Day {
-  day: string,
-  buildings: Building[]
-}
-
-interface Building {
-  name: string,
-  courses: Course[]
-}
-
-interface Course {
-  name: string,
-  teacherName: string,
-  room: string,
-  faculty: string,
-  startTime: string | Date,
-  endTime: string | Date,
-}
