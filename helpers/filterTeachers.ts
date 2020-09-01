@@ -8,7 +8,6 @@ const rawTeachersData = fs.readFileSync(path.join(__dirname, '../sources/teacher
 
 const createTeachersList = async (): Promise<string[]> => {
   const teachersData = await neatCsv(rawTeachersData);
-  console.log('teachersData: ', teachersData[0]);
   return teachersData.map((teacher: any) => {
     return `${teacher['Last Name'].trim()} ${teacher['First Name'].trim()}`
   });

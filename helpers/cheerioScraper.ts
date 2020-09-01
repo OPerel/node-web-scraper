@@ -61,7 +61,7 @@ describe('get class info', () => {
 
     // Call filterTeachers.ts with rowsObjects
     const filteredData: RawClass[] = await filterClassData(d);
-    console.log(filteredData.length, filteredData[0]);
+    console.log('Number of classes: ', filteredData.length);
 
 
     // Call formatData.ts with answer from filterTeachers.ts
@@ -69,7 +69,7 @@ describe('get class info', () => {
       
 
     // Write to CSV file with answer from formatData.ts
-    fs.writeFile('./dist/csvTest2.csv', csvString, (err: Error) => {
+    fs.writeFile(`./dist/AcTA${new Date().getTime()}.csv`, csvString, (err: Error) => {
       if (err) {
         console.log('Error writing file', err)
       } else {
