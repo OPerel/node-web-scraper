@@ -4,7 +4,7 @@ import neatCsv from 'neat-csv';
 
 import { RawClass } from '../types';
 
-const rawTeachersData = fs.readFileSync(path.join(__dirname, '../sources/teachers.csv'));
+const rawTeachersData = fs.readFileSync(path.join(__dirname, '../sources/ata_teachers.csv'));
 
 /**
  * Create an array of teachers' names
