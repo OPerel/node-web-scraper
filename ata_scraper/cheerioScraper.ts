@@ -69,7 +69,7 @@ describe('get class info', () => {
       
 
     // Write to CSV file with answer from formatData.ts
-    fs.writeFile(`../dist/AcTA${new Date().getTime()}.csv`, csvString, (err: Error) => {
+    fs.writeFile(`../dist/AcTA/${new Date().getTime()}.csv`, csvString, (err: Error) => {
       if (err) {
         console.log('Error writing file', err)
       } else {
