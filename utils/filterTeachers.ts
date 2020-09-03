@@ -6,6 +6,7 @@ import neatCsv from 'neat-csv';
  * 
  */
 export default async <T extends { professor: string }>(csvFile: string, classData: T[]): Promise<T[]> => {
+  
   const rawTeachersData = fs.readFileSync(path.join(__dirname, `../sources/${csvFile}.csv`));
 
   /**
@@ -45,12 +46,12 @@ export default async <T extends { professor: string }>(csvFile: string, classDat
    * @description Filters the classes with teachers in the array created by createTeachersList()
    * @param classData Array of all classes from the HTML table
    */
-  const filterHitClassData = async (classData: T[]): Promise<T[]> => {
+  const filterClassData = async (): Promise<T[]> => {
     const ls: string[] = await createTeachersList();
     return classData.filter((c) => {
       return ls.includes(formatProfsName(c.professor));
     });
   }
 
-  return await filterHitClassData(classData);
+  return await filterClassData();
 }
