@@ -5,7 +5,7 @@ exports.config = {
   framework: 'jasmine',
   allScriptsTimeout: 50000000,
   seleniumAddress: 'http://localhost:4444/wd/hub',
-  specs: ['helpers/cheerioScraper.ts'],
+  specs: ['./scraper.ts'],
   capabilites : {
     browser: 'chrome'
   },
@@ -15,7 +15,7 @@ exports.config = {
   },
   onPrepare: () => {
     tsNode.register({
-      project: require('path').join(__dirname, './tsconfig.json')
+      project: require('path').join(__dirname, '../tsconfig.json')
     });
     jasmine.getEnv().addReporter(new SpecReporter());
   },

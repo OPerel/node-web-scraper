@@ -4,7 +4,7 @@ import neatCsv from 'neat-csv';
 
 import { RawClass } from '../types';
 
-const rawTeachersData = fs.readFileSync(path.join(__dirname, '../sources/teachers.csv'));
+const rawTeachersData = fs.readFileSync(path.join(__dirname, '../sources/ata_teachers.csv'));
 
 /**
  * Create an array of teachers' names
@@ -19,6 +19,25 @@ const createTeachersList = async (): Promise<string[]> => {
 }
 
 /**
+ * Format teacher's name
+ * 
+ * @param profName
+ */
+const formatTeachersName = (profName: string): string => {
+  const prof = `פרופ'`;
+  const dr = `ד"ר`;
+
+  if (profName) {
+    const firstWord = profName.split(' ')[0];
+    if (prof === firstWord || dr === firstWord) {
+      return profName.split(' ').slice(1).join(' ').trim();
+    }
+  }
+
+  return profName;
+}
+
+/**
  * Filter classes 
  * 
  * @description Filters the classes with teachers in the array created by createTeachersList()
@@ -27,7 +46,7 @@ const createTeachersList = async (): Promise<string[]> => {
 export const filterClassData = async (classData: RawClass[]): Promise<RawClass[]> => {
   const ls: string[] = await createTeachersList();
   return classData.filter((c: RawClass) => {
-    return ls.includes(c.proffesor.split(' ').slice(1).join(' ').trim());
+    return ls.includes(formatTeachersName(c.proffesor));
   });
 }
 
