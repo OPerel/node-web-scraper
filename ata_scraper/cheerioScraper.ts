@@ -5,6 +5,7 @@ const cheerio = require('cheerio');
 import * as CSV from 'csv-string';
 
 import filterAtaClassData from '../utils/filterTeachers';
+import sortByDay from '../utils/sortByDay';
 
 export interface AtaClass {
   code: string,
@@ -85,9 +86,8 @@ describe('get class info', () => {
     console.log('Number of classes: ', filteredClasses.length);
 
     // sort by day
-    const days = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
-    const sortedClasses = filteredClasses.sort((a, b) => days.indexOf(a.time[0]) - days.indexOf(b.time[0]));
-    const sortedNoTeacherClasses = noTeacherClasses.sort((a, b) => days.indexOf(a.time[0]) - days.indexOf(b.time[0]));
+    const sortedClasses = sortByDay(filteredClasses);
+    const sortedNoTeacherClasses = sortByDay(noTeacherClasses);
       
     // initialize CSV string with headers row
     let csvString: string = 'קוד, שיעור, מרצה, מועד\n';

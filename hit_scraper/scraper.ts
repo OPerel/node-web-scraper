@@ -5,6 +5,7 @@ const cheerio = require('cheerio');
 import * as CSV from 'csv-string';
 
 import filterHitClassData from '../utils/filterTeachers';
+import SortByDay from '../utils/sortByDay';
 
 export interface HitClass {
   name: string;
@@ -63,12 +64,10 @@ describe('get HIT class info', () => {
     const filteredClasses = await filterHitClassData('hit_teachers', rows);
 
     // sort by day
-    const days = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
-    const sortedClasses = filteredClasses.sort((a, b) => days.indexOf(a.time[0]) - days.indexOf(b.time[0]));
+    const sortedClasses = SortByDay(filteredClasses);
 
     // initialize CSV string with headers row
     let csvString: string = 'שיעור, מרצה, מועד\n';
-
     sortedClasses.forEach(c => csvString += CSV.stringify(c));
     
 

@@ -38,10 +38,9 @@ export default async <T extends { professor: string }>(csvFile: string, classDat
   }
 
   /**
-   * Filter classes 
+   * Filter classes by teachers
    * 
    * @description Filters the classes with teachers in the array created by createTeachersList()
-   * @param classData Array of all classes from the HTML table
    */
   const filterClassData = async (): Promise<T[]> => {
     const ls: string[] = await createTeachersList();
