@@ -57,15 +57,28 @@ describe('get class info', () => {
           const rowVals: string[] = $(row).children('td').map((_: number, cell: any) => $(cell).text());
 
           // Build class object and push to rows objects array 
-          console.log(`row #${idx} created for class: ${rowVals[6]}`);
+          console.log(`row #${idx} created for class: ${rowVals[1]}`);
+          
+          // add additional time to last row if no code (rowVals[0])
+          if (rowVals[0].trim() === '') {
+            // make sure the code matches to last row entry
+            if (rowsObjects[rowsObjects.length - 1].code === rowVals[1].match(/(\d+)/)[0]) {
+              console.log('regexp code: ', rowVals[1].match(/(\d+)/)[0]);
+              rowsObjects[rowsObjects.length - 1].time += `, ${rowVals[4].trim()} ${rowVals[5].trim()} ${rowVals[6].trim()}`;
+              return;
+            }
+          }
+
           rowsObjects.push(ataClassInfo(rowVals));
-        // }
       });
 
       return rowsObjects;
     }
 
     const rows: AtaClass[] = $('body').getTableData();
+
+    // filter classes with no teacher
+    const noTeacherClasses = rows.filter(row => !row.professor && row.code);
 
     // filter teachers
     const filteredClasses = await filterAtaClassData('ata_teachers', rows);
@@ -74,13 +87,15 @@ describe('get class info', () => {
     // sort by day
     const days = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
     const sortedClasses = filteredClasses.sort((a, b) => days.indexOf(a.time[0]) - days.indexOf(b.time[0]));
+    const sortedNoTeacherClasses = noTeacherClasses.sort((a, b) => days.indexOf(a.time[0]) - days.indexOf(b.time[0]));
       
-
-    
     // initialize CSV string with headers row
     let csvString: string = 'קוד, שיעור, מרצה, מועד\n';
-
     sortedClasses.forEach(c => csvString += CSV.stringify(c));
+
+    // add classes with no teacher to csvString
+    csvString += '\n, ,שיעורים ללא מרצה, ,\n';
+    sortedNoTeacherClasses.forEach(c => csvString += CSV.stringify(c));
     
     // Write to CSV file with answer from formatData.ts
     fs.writeFile(`../dist/AcTA/${new Date().getTime()}.csv`, csvString, (err: Error) => {
@@ -98,5 +113,5 @@ const ataClassInfo = (classVals: string[]): AtaClass => ({
   code: classVals[0].trim(),
   name: classVals[1].trim(),
   professor: classVals[7].trim(),
-  time: `${classVals[4].trim()} ${classVals[5].trim()}`
+  time: `${classVals[4].trim()} ${classVals[5].trim()} ${classVals[6].trim()}`
 });
