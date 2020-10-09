@@ -64,8 +64,9 @@ describe('get class info', () => {
           if (rowVals[0].trim() === '') {
             // make sure the code matches to last row entry
             if (rowsObjects[rowsObjects.length - 1].code === rowVals[1].match(/(\d+)/)[0]) {
-              console.log('regexp code: ', rowVals[1].match(/(\d+)/)[0]);
-              rowsObjects[rowsObjects.length - 1].time += `, ${rowVals[4].trim()} ${rowVals[5].trim()} ${rowVals[6].trim()}`;
+              const time = `${rowVals[4].trim()} ${rowVals[5].trim()} ${rowVals[6].trim()}`;
+              const { code, name, professor } = rowsObjects[rowsObjects.length - 1];
+              rowsObjects.push({ code, name, professor, time });
               return;
             }
           }
