@@ -27,14 +27,11 @@ export default async <T extends { professor: string }>(csvFile: string, classDat
    * @param profName
    */
   const formatProfsName = (profName: string): string => {
-    const prof = `פרופ'`;
-    const dr = `ד"ר`;
+    const titles = [`פרופ'`, `ד"ר` ,`מר`];
+    const firstWord = profName.split(' ')[0];
 
-    if (profName) {
-      const firstWord = profName.split(' ')[0];
-      if (prof === firstWord || dr === firstWord) {
-        return profName.split(' ').slice(1).join(' ').trim();
-      }
+    if (titles.includes(firstWord)) {
+      return profName.split(' ').slice(1).join(' ').trim();
     }
 
     return profName;
