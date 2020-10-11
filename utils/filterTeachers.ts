@@ -5,7 +5,7 @@ import neatCsv from 'neat-csv';
 /**
  * 
  */
-export default async <T extends { professor: string }>(csvFile: string, classData: T[]): Promise<T[]> => {
+export default async <T extends { professor: string | string[] }>(csvFile: string, classData: T[]): Promise<T[]> => {
   
   const rawTeachersData = fs.readFileSync(path.join(__dirname, `../sources/${csvFile}.csv`));
 
@@ -17,7 +17,10 @@ export default async <T extends { professor: string }>(csvFile: string, classDat
   const createTeachersList = async (): Promise<string[]> => {
     const teachersData = await neatCsv(rawTeachersData);
     return teachersData.map((teacher: any) => {
-      return `${teacher['Last Name'].trim()} ${teacher['First Name'].trim()}`
+      if (Object.keys(teacher).length > 1) {
+        return `${teacher['Last Name'].trim()} ${teacher['First Name'].trim()}`;
+      }
+      return Object.values(teacher).join('');
     });
   }
 
@@ -44,10 +47,39 @@ export default async <T extends { professor: string }>(csvFile: string, classDat
    */
   const filterClassData = async (): Promise<T[]> => {
     const ls: string[] = await createTeachersList();
-    return classData.filter((c) => {
-      return ls.includes(formatProfsName(c.professor));
+    console.log('ls: ', ls)
+    let filtered: T[] = [];
+    classData.forEach(c => {
+      if (typeof c.professor === 'string') {
+        if (ls.includes(formatProfsName(c.professor))) {
+          filtered.push(c);
+        }
+      } else {
+        const teachersInProfs = c.professor.filter(p => ls.includes(formatProfsName(p)));
+        if (teachersInProfs.length) {
+          c.professor = teachersInProfs.join(', ');
+          filtered.push(c);
+        }
+      }
     });
+
+    console.log('filtered: ', filtered);
+    return filtered;
   }
 
   return await filterClassData();
 }
+
+
+
+/**
+ * return classData.filter((c) => {
+      if (typeof c.professor === 'string') {
+        console.log('one professor: ', c.professor)
+        return ls.includes(formatProfsName(c.professor));
+      }
+      const prof = c.professor.filter(p => ls.includes(formatProfsName(p))).join(', ');
+      console.log('multiple professors: ', prof)
+      return prof;
+    });
+ */

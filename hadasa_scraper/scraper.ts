@@ -8,7 +8,7 @@ import SortByDay from '../utils/sortByDay';
 
 interface HadasaClass {
   name: string,
-  professor: string,
+  professor: string | string[],
   time: string
 }
 
@@ -25,15 +25,9 @@ describe('get Hadasa class info', () => {
   });
 
   it('should iterate until the last page', async () => {
-    let nextPage: ElementFinder;
-    try {
-        nextPage = element(by.css('a[title="Go to next page"]')) || null;
-      } catch (err) {
-        console.log('Last page: ', err)
-      }
+    let nextPage: ElementFinder | null;
+    nextPage = element(by.css('a[title="Go to next page"]'));
     
-    // expect(nextPage.getText()).toBe('>');
-
     let allClasses: HadasaClass[] = [];
 
     while (nextPage) {
@@ -42,14 +36,17 @@ describe('get Hadasa class info', () => {
         
       $('.list_items_all > li').each((idx, item) => {
         const name = $(item).find('h3').text().trim();
-        // console.log('name: ', name);
 
-        const professor = $(item).find('a').text().trim();
-        // console.log('professor: ', professor);
+        const rawProfessor = $(item).find('a').text().trim();
+        let professor: string | string[];
+        if (rawProfessor.includes('\n')) {
+          professor = rawProfessor.split('\n').map(prof => prof.trim()).filter(prof => prof);
+        } else {
+          professor = rawProfessor;
+        }
 
         const rawTime = $(item).find('.list_td_study').last().children('div').eq(1).text().trim().split('\n');
         const time = rawTime[rawTime.length - 1].trim();
-        // console.log('time: ', time);
 
         console.log(`class ${idx}: `, {name, professor, time});
         allClasses.push({
@@ -57,53 +54,39 @@ describe('get Hadasa class info', () => {
         });
       });
 
-      browser.executeScript("arguments[0].scrollIntoView();", nextPage);
-      nextPage.click();
-      browser.sleep(1000)
+      // nextPage = null;
+      try {
+        await browser.executeScript("arguments[0].scrollIntoView();", nextPage);
+        await nextPage.click();
+        await browser.sleep(1000)
+      } catch (err) {
+        console.log('**** Last page ****\n', err);
+        nextPage = null;
+      }
     }
 
-    console.log('allClasses: ', allClasses.length, allClasses);
-    // const filteredClasses = await filterHitClassData('hit_teachers', allClasses);
+    console.log('allClasses: ', allClasses, allClasses.length);
+
+    // filter teachers
+    const filteredClasses = await filterHitClassData('hadasa_teachers', allClasses);
+    console.log('filteredClasses: ', filteredClasses, filteredClasses.length);
 
     // sort by day
-    // const sortedClasses = SortByDay(filteredClasses);
+    const sortedClasses = SortByDay(filteredClasses);
 
     // initialize CSV string with headers row
     let csvString: string = 'שיעור, מרצה, מועד\n';
-    allClasses.forEach(c => csvString += CSV.stringify(c));
+    sortedClasses.forEach(c => csvString += CSV.stringify(c));
     
 
     // Write to CSV file with csvString
-    fs.writeFile(`../dist/HIT/${new Date().getTime()}.csv`, csvString, (err: Error) => {
-      if (err) {
-        console.log('Error writing file', err)
-      } else {
-        console.log('Successfully wrote file')
-      }
-    });
+    // fs.writeFile(`../dist/Hadasa/${new Date().getTime()}.csv`, csvString, (err: Error) => {
+    //   if (err) {
+    //     console.log('Error writing file', err);
+    //     return;
+    //   }
+    //   console.log('Successfully wrote file');
+    // });
   });
  
 });
-
-
-/**
- * const classListLi = element(by.css('.list_items_all')).all(by.tagName('li'));
-      classListLi.each(async item => {
-        const itemClass = await item.getAttribute('class')
-        if (!itemClass.includes('title')) {
-          // console.log('li: ', await item.getText())
-          // await clickThis.click();
-          const name = await item.element(by.tagName('h3')).getText();
-          const html = await item.
-          console.log('name: ', name)
-          
-          // const classInfo = await item.all(by.css('.list_td_study')).get(0);
-          // const professorDiv = await classInfo.get(0).getText()//.all(by.tagName('div'));
-          const professor = await item.element(by.tagName('a')).getText();
-          console.log('professor: ', professor);
-
-          // await clickThis.click();
-        }
-        
-      });
- */
