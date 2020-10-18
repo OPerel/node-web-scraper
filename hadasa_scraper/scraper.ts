@@ -68,11 +68,11 @@ describe('get Hadasa class info', () => {
     console.log('allClasses: ', allClasses, allClasses.length);
 
     // filter teachers
-    const filteredClasses = await filterHitClassData('hadasa_teachers', allClasses);
-    console.log('filteredClasses: ', filteredClasses, filteredClasses.length);
+    // const filteredClasses = await filterHitClassData('hadasa_teachers', allClasses);
+    // console.log('filteredClasses: ', filteredClasses, filteredClasses.length);
 
     // sort by day
-    const sortedClasses = SortByDay(filteredClasses);
+    const sortedClasses = SortByDay(allClasses);
 
     // initialize CSV string with headers row
     let csvString: string = 'שיעור, מרצה, מועד\n';
@@ -80,13 +80,13 @@ describe('get Hadasa class info', () => {
     
 
     // Write to CSV file with csvString
-    // fs.writeFile(`../dist/Hadasa/${new Date().getTime()}.csv`, csvString, (err: Error) => {
-    //   if (err) {
-    //     console.log('Error writing file', err);
-    //     return;
-    //   }
-    //   console.log('Successfully wrote file');
-    // });
+    fs.writeFile(`../dist/Hadasa/${new Date().getTime()}.csv`, csvString, (err: Error) => {
+      if (err) {
+        console.log('Error writing file', err);
+        return;
+      }
+      console.log('Successfully wrote file');
+    });
   });
  
 });
